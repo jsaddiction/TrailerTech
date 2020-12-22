@@ -17,6 +17,9 @@ echo "********** INSTALLING PYTHON3 **********"
 apt install python3 -y
 apt install python3-pip -y
 
+echo "********** INSTALLING FFMPEG **********"
+apt-get install ffmpeg -y
+
 if [ ! -d ${parentDir} ]
 then
     echo "*********** Creating script parent directory ************"

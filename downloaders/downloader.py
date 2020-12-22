@@ -11,6 +11,8 @@ from downloaders import DL_DIRECTORY
 log = logger.get_log(__name__)
 
 class Downloader():
+    def __init__(self):
+        self._createTempDir()
 
     def cleanUp(self):
         for filename in os.listdir(DL_DIRECTORY):
@@ -40,6 +42,10 @@ class Downloader():
             log.warning('Failed to move {} ERROR: {}'.format(os.path.basename(source), e))
             return False
         return True
+
+    def _createTempDir(self):
+        if not os.path.isdir(DL_DIRECTORY):
+            os.mkdir(DL_DIRECTORY)
 
     def downloadYouTube(self, fileName, destinationDirectory, link):
         tempFilePath = os.path.join(DL_DIRECTORY, fileName)

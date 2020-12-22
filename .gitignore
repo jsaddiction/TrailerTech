@@ -12,6 +12,9 @@ settings.ini
 # log file
 TrailerTech.log
 
+# todo file
+todo.txt
+
 # VSCode
 .vscode/
 .devenv
