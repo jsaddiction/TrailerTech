@@ -11,6 +11,7 @@ settings.ini
 
 # log file
 TrailerTech.log
+TrailerTech.log.*
 
 # todo file
 todo.txt
