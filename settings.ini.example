@@ -1,0 +1,17 @@
+[LOGS]
+log_level=info
+log_to_file=false
+
+[TMDB]
+api_key=
+
+[TRAILERS]
+min_resolution=480
+max_resolution=1080
+languages=en
+
+[APPLE]
+enabled=True
+
+[YOUTUBE]
+enabled=true

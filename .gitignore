@@ -6,6 +6,16 @@ __pycache__/
 # C extensions
 *.so
 
+# Settings file
+settings.ini
+
+# log file
+TrailerTech.log
+
+# VSCode
+.vscode/
+.devenv
+
 # Distribution / packaging
 .Python
 build/
