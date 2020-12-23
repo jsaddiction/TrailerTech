@@ -16,7 +16,7 @@ class Tmdb(object):
 
     @property
     def hasAPIkey(self):
-        return not tmdb.API_KEY == None
+        return not tmdb.API_KEY == ''
 
     @property
     def title(self):
