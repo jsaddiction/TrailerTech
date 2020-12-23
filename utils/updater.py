@@ -134,20 +134,6 @@ class Updater():
         if os.path.exists(os.path.join(APP_ROOT, u'.git')):
             self.log.debug('APP_ROOT is git repo: {}'.format(APP_ROOT))
             return APP_ROOT
-        # # file_path, file_name = __get_calling_file()
-        # file_path, _ = self.__get_calling_file()
-        # # walk up the file tree looking for a valid git repo, stop when we hit the base
-        # while True:
-        #     if os.path.samefile(os.path.normpath(file_path), os.path.normpath("/")):
-        #         self.log.warning("Calling script is not in a valid git repo")
-        #         raise LookupError("Calling script is not in a valid git repo")
-
-        #     try:
-        #         git.Repo(file_path)
-        #         self.log.debug("Found root of repo located at: {}".format(os.path.normpath(file_path)))
-        #         return os.path.normpath(file_path)
-        #     except git.InvalidGitRepositoryError:
-        #         file_path = os.path.normpath(file_path + "/..")
 
     def __clean_pycache(self, rootDir):
         '''
