@@ -28,7 +28,6 @@ class Config(object):
                 print('Could not create your settings file. Create it manually.')
             else:
                 print('Please configure settings.ini and rerun this script.')
-            sys.exit(1)
 
     @property
     def log_level(self):
@@ -49,7 +48,7 @@ class Config(object):
         if not self._raw_config is None:
             if 'TMDB' in self._raw_config.sections():
                 return self._raw_config['TMDB'].get('api_key', '')
-        return False
+        return ''
 
     @property
     def languages(self):
