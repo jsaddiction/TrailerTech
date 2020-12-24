@@ -236,6 +236,7 @@ class MovieFolder():
             return self._nfo.tmdb
         return None
 
+    @property
     def imdb(self):
         if self._nfo and self._nfo.imdb:
             return self._nfo.imdb
@@ -276,7 +277,8 @@ class MovieFolder():
 
     def _parseIMDBFromMovieFile(self):
         if self.movie:
-            imdb = self.movie.fileName.split('(')[-1].replace('(', '').replace(')', '').strip()
+            imdb = os.path.splitext(self.movie.fileName)[0].split('(')[-1].replace('(', '').replace(')', '').strip()
+            log.debug('Parsed IMDB from movie file name: {}'.format(imdb))
             match = re.match(IMDB_ID_PATTERN, imdb)
             if match:
                 return imdb
