@@ -33,19 +33,25 @@ class File():
         return os.path.getsize(self.path)
 
 class Video(File):
-    def __init__(self, path, skip_processing=False, is_trailer=False):
+    def __init__(self, path):
         super().__init__(path)
-        if skip_processing:
-            if is_trailer:
-                self.duration = MIN_MOVIE_DURATION - 1
-            else:
-                self.duration = MIN_MOVIE_DURATION + 1
-        else:
-            self.duration = self.get_duration()
 
     @property
     def isMovie(self):
-        return self.duration >= MIN_MOVIE_DURATION
+        if os.path.splitext(self.fileName)[0].endswith('-trailer'):
+            return False
+
+        duration = self.get_duration()
+        if duration:
+            if duration >= MIN_MOVIE_DURATION:
+                return True
+            else:
+                # video is less than min_movie_duration
+                return False
+        else:
+            # Unable to determine duration assume its the movie since it doesn't have -trailer in file name
+            return True
+
 
     def get_duration(self):
         result = subprocess.run([
@@ -57,13 +63,9 @@ class Video(File):
             stderr=subprocess.STDOUT
             )
         try:
-            duration = float(result.stdout)
+            return = float(result.stdout)
         except ValueError:
-            if os.path.splitext(self.fileName)[0].endswith('-trailer'):
-                duration = 1
-            else:
-                duration = MIN_MOVIE_DURATION + 1
-        return duration
+            return None
 
 class NFO(File):
     def __init__(self, path):
