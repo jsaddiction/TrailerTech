@@ -59,8 +59,8 @@ class TrailerTech():
             self.tmdb.get_movie_details(tmdbid, imdbid, title, year)
             appleLinks = self.apple.getLinks(title, year)
         else:
-            self.tmdb.get_movie_details(folder.nfo.tmdb, folder.nfo.imdb, folder.nfo.title, folder.nfo.year)
-            appleLinks = self.apple.getLinks(folder.nfo.title, folder.nfo.year)
+            self.tmdb.get_movie_details(folder.tmdb, folder.imdb, folder.title, folder.year)
+            appleLinks = self.apple.getLinks(folder.title, folder.year)
         ytLinks = self.tmdb.get_trailer_links(config.languages, config.min_resolution)
         
         log.debug('Found {} trailer Links.'.format(len(appleLinks) + len(ytLinks)))

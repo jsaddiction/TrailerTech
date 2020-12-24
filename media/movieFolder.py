@@ -211,8 +211,38 @@ class MovieFolder():
         self.rootDir = os.path.abspath(directory)
         self.movie = None
         self.trailer = None
-        self.nfo = None
+        self._nfo = None
         self.scan()
+
+    @property
+    def title(self):
+        if self._nfo and self._nfo.title:
+            return self._nfo.title
+        else:
+            return self._parseTitleFromFolder()
+        return None
+
+    @property
+    def year(self):
+        if self._nfo and self._nfo.year:
+            return self._nfo.year
+        else:
+            return self._parseYearFromFolder()
+        return None
+
+    @property
+    def tmdb(self):
+        if self._nfo and self._nfo.tmdb:
+            return self._nfo.tmdb
+        return None
+
+    @property
+    def imdb(self):
+        if self._nfo and self._nfo.imdb:
+            return self._nfo.imdb
+        else:
+            return self._parseIMDBFromMovieFile()
+        return None
 
     @property
     def trailerName(self):
@@ -232,6 +262,28 @@ class MovieFolder():
     def hasMovie(self):
         return not self.movie == None
 
+    def _parseTitleFromFolder(self):
+        title = os.path.basename(self.rootDir).split('(')[0].strip()
+        log.debug('Parsed title from folder: {}'.format(title)) 
+        return title
+
+    def _parseYearFromFolder(self):
+        year = os.path.basename(self.rootDir).split('(')[-1].replace('(', '').replace(')', '').strip()
+        log.debug('Parsed year from folder: {}'.format(year))
+        match = re.match(YEAR_PATTERN, year)
+        if match:
+            return year
+        return None
+
+    def _parseIMDBFromMovieFile(self):
+        if self.movie:
+            imdb = os.path.splitext(self.movie.fileName)[0].split('(')[-1].replace('(', '').replace(')', '').strip()
+            log.debug('Parsed IMDB from movie file name: {}'.format(imdb))
+            match = re.match(IMDB_ID_PATTERN, imdb)
+            if match:
+                return imdb
+        return None
+
     def scan(self):
         for item in os.scandir(self.rootDir):
             if os.path.isfile(item.path):
@@ -246,9 +298,9 @@ class MovieFolder():
                         log.debug('Trailer Found: {}'.format(self.trailer.fileName))
                 elif ext in NFO_EXTENSIONS:
                     nfo = NFO(item.path)
-                    if (nfo.is_complete and not self.nfo) or (nfo.is_complete and nfo.fileSize > self.nfo.fileSize):
-                        self.nfo = nfo
-                        log.debug('NFO Found: {}'.format(self.nfo.fileName))
+                    if (nfo.is_complete and not self._nfo) or (nfo.is_complete and nfo.fileSize > self._nfo.fileSize):
+                        self._nfo = nfo
+                        log.debug('NFO Found: {}'.format(self._nfo.fileName))
             
             elif os.path.isdir(item.path):
     
