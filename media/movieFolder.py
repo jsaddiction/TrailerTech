@@ -33,19 +33,25 @@ class File():
         return os.path.getsize(self.path)
 
 class Video(File):
-    def __init__(self, path, skip_processing=False, is_trailer=False):
+    def __init__(self, path):
         super().__init__(path)
-        if skip_processing:
-            if is_trailer:
-                self.duration = MIN_MOVIE_DURATION - 1
-            else:
-                self.duration = MIN_MOVIE_DURATION + 1
-        else:
-            self.duration = self.get_duration()
 
     @property
     def isMovie(self):
-        return self.duration >= MIN_MOVIE_DURATION
+        if os.path.splitext(self.fileName)[0].endswith('-trailer'):
+            return False
+
+        duration = self.get_duration()
+        if duration:
+            if duration >= MIN_MOVIE_DURATION:
+                return True
+            else:
+                # video is less than min_movie_duration
+                return False
+        else:
+            # Unable to determine duration assume its the movie since it doesn't have -trailer in file name
+            return True
+
 
     def get_duration(self):
         result = subprocess.run([
@@ -57,13 +63,9 @@ class Video(File):
             stderr=subprocess.STDOUT
             )
         try:
-            duration = float(result.stdout)
+            return float(result.stdout)
         except ValueError:
-            if os.path.splitext(self.fileName)[0].endswith('-trailer'):
-                duration = 1
-            else:
-                duration = MIN_MOVIE_DURATION + 1
-        return duration
+            return None
 
 class NFO(File):
     def __init__(self, path):
@@ -211,8 +213,38 @@ class MovieFolder():
         self.rootDir = os.path.abspath(directory)
         self.movie = None
         self.trailer = None
-        self.nfo = None
+        self._nfo = None
         self.scan()
+
+    @property
+    def title(self):
+        if self._nfo and self._nfo.title:
+            return self._nfo.title
+        else:
+            return self._parseTitleFromFolder()
+        return None
+
+    @property
+    def year(self):
+        if self._nfo and self._nfo.year:
+            return self._nfo.year
+        else:
+            return self._parseYearFromFolder()
+        return None
+
+    @property
+    def tmdb(self):
+        if self._nfo and self._nfo.tmdb:
+            return self._nfo.tmdb
+        return None
+
+    @property
+    def imdb(self):
+        if self._nfo and self._nfo.imdb:
+            return self._nfo.imdb
+        else:
+            return self._parseIMDBFromMovieFile()
+        return None
 
     @property
     def trailerName(self):
@@ -232,6 +264,28 @@ class MovieFolder():
     def hasMovie(self):
         return not self.movie == None
 
+    def _parseTitleFromFolder(self):
+        title = os.path.basename(self.rootDir).split('(')[0].strip()
+        log.debug('Parsed title from folder: {}'.format(title)) 
+        return title
+
+    def _parseYearFromFolder(self):
+        year = os.path.basename(self.rootDir).split('(')[-1].replace('(', '').replace(')', '').strip()
+        log.debug('Parsed year from folder: {}'.format(year))
+        match = re.match(YEAR_PATTERN, year)
+        if match:
+            return year
+        return None
+
+    def _parseIMDBFromMovieFile(self):
+        if self.movie:
+            imdb = os.path.splitext(self.movie.fileName)[0].split('(')[-1].replace('(', '').replace(')', '').strip()
+            log.debug('Parsed IMDB from movie file name: {}'.format(imdb))
+            match = re.match(IMDB_ID_PATTERN, imdb)
+            if match:
+                return imdb
+        return None
+
     def scan(self):
         for item in os.scandir(self.rootDir):
             if os.path.isfile(item.path):
@@ -246,9 +300,9 @@ class MovieFolder():
                         log.debug('Trailer Found: {}'.format(self.trailer.fileName))
                 elif ext in NFO_EXTENSIONS:
                     nfo = NFO(item.path)
-                    if (nfo.is_complete and not self.nfo) or (nfo.is_complete and nfo.fileSize > self.nfo.fileSize):
-                        self.nfo = nfo
-                        log.debug('NFO Found: {}'.format(self.nfo.fileName))
+                    if (nfo.is_complete and not self._nfo) or (nfo.is_complete and nfo.fileSize > self._nfo.fileSize):
+                        self._nfo = nfo
+                        log.debug('NFO Found: {}'.format(self._nfo.fileName))
             
             elif os.path.isdir(item.path):
     
