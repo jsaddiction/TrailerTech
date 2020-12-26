@@ -63,7 +63,7 @@ class Video(File):
             stderr=subprocess.STDOUT
             )
         try:
-            return = float(result.stdout)
+            return float(result.stdout)
         except ValueError:
             return None
 
