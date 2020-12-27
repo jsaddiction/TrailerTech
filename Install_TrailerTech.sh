@@ -6,7 +6,7 @@
 # PGID same as PUID but for group
 installDirectory="/scripts/TrailerTech"
 # ${PUID}=1234
-# #{PGID}=1234
+# ${PGID}=1234
 
 ### Scripts variables
 parentDir="$(dirname ${installDirectory})"
@@ -14,23 +14,21 @@ requirementsFile="${installDirectory}/requirements.txt"
 ## ubuntu/ Debian based part
 if [[ -n "$(command -v apt-get)" ]]; then
    apt update -yq
-   echo "********** INSTALLING GIT **********"
-   apt install --no-install-recommends git -yq
-   echo "********** INSTALLING PYTHON3 **********"
-   apt install python3 python3-pip -yq
-   echo "********** INSTALLING FFMPEG **********"
-   apt-get install ffmpeg -yq
+   install="git python3 python3 ffmpeg"
+   for i in ${install}; do
+       echo "********** INSTALLING $i **********"
+       apt install $i -yq
+   done   
 fi
 ## alpine install 
 if [[ -n "$(command -v apk)" ]]; then
    apk -qU --no-cache update
    apk -qU --no-cache upgrade
-   echo "********** INSTALLING GIT **********"
-   apk -qU --no-cache --no-progres add git
-   echo "********** INSTALLING PYTHON3 **********"
-   apk -qU --no-cache --no-progres add python3 python3-pip
-   echo "********** INSTALLING FFMPEG **********"
-   apk -qU --no-cache --no-progres add ffmpeg 
+   install="git python3 python3 ffmpeg"
+   for i in ${install}; do
+       echo "********** INSTALLING $i **********"
+       apk -qU --no-cache --no-progres add $i
+   done
 fi
 
 if [ ! -d ${parentDir} ]
