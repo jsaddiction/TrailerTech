@@ -46,8 +46,8 @@ class Video(File):
             if duration >= MIN_MOVIE_DURATION:
                 return True
             else:
-                # video is less than min_movie_duration
-                return False
+                # video is less than min_movie_duration and does not include -trailer in its filename
+                return None
         else:
             # Unable to determine duration assume its the movie since it doesn't have -trailer in file name
             return True
@@ -292,12 +292,15 @@ class MovieFolder():
                 ext = os.path.splitext(item.path)[-1]
                 if ext in VIDEO_EXTENSIONS:
                     video = Video(item.path)
-                    if video.isMovie:
+                    isMovie = video.isMovie
+                    if isMovie:
                         self.movie = video
                         log.debug('Movie Found: {}'.format(self.movie.fileName))
-                    else:
+                    elif isMovie == False:
                         self.trailer = video
                         log.debug('Trailer Found: {}'.format(self.trailer.fileName))
+                    elif isMovie == None:
+                        log.warning('Could not determine if video is movie or trailer: {}'.format(video.fileName))
                 elif ext in NFO_EXTENSIONS:
                     nfo = NFO(item.path)
                     if (nfo.is_complete and not self._nfo) or (nfo.is_complete and nfo.fileSize > self._nfo.fileSize):
@@ -311,13 +314,14 @@ class MovieFolder():
                     log.debug('Encountered a BluRay folder structure "{}"'.format(item.path))
                     bd_file = os.path.join(item.path, 'index.bdmv')
                     if os.path.isfile(bd_file):
-                        video = Video(bd_file, skip_processing=True, is_trailer=False)
+                        video = Video(bd_file)
                         log.debug('Movie Found: {}'.format(video.fileName))
                         self.movie = video
                         # Find the trailer in the BDMV folder
                         for entry in os.listdir(item.path):
-                            if 'index-trailer' in entry.lower():
-                                video = Video(os.path.join(item.path, entry))
+                            path = os.path.join(item.path, entry)
+                            if os.path.isfile(path) and os.path.splitext(path)[-1] in VIDEO_EXTENSIONS:
+                                video = Video(path)
                                 if not video.isMovie:
                                     log.debug('Found trailer: {}'.format(video.fileName))
                                     self.trailer = video
@@ -327,13 +331,14 @@ class MovieFolder():
                     log.debug('Encountered a DVD folder structure "{}"'.format(item.path))
                     dvd_file = os.path.join(item.path, 'VIDEO_TS.IFO')
                     if os.path.isfile(dvd_file):
-                        video = Video(dvd_file, skip_processing=True, is_trailer=False)
+                        video = Video(dvd_file)
                         log.debug('Movie Found: {}'.format(video.fileName))
                         self.movie = video
                         # Find the trailer in the VIDEO_TS folder
                         for entry in os.listdir(item.path):
-                            if 'video_ts-trailer' in entry.lower():
-                                video = Video(os.path.join(item.path, entry))
+                            path = os.path.join(item.path, entry)
+                            if os.path.isfile(path) and os.path.splitext(path)[-1] in VIDEO_EXTENSIONS:
+                                video = Video(path)
                                 if not video.isMovie:
                                     log.debug('Trailer Found: {}'.format(video.fileName))
                                     self.trailer = video
