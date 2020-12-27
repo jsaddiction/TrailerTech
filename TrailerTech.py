@@ -44,34 +44,41 @@ class TrailerTech():
 
     def get_Trailer(self, movieDir, tmdbid=None, imdbid=None, title=None, year=None):
         if not os.path.isdir(os.path.abspath(movieDir)):
-            log.warning('Invalid path: {}'.format(movieDir))
+            log.warning('Skipping. Invalid path: {}'.format(movieDir))
             return
 
         folder = MovieFolder(movieDir)
         if not folder.hasMovie:
-            log.warning('Unable to determine Movie file in: {}'.format(movieDir))
+            log.warning('Skipping. Unable to determine Movie file in: {}'.format(movieDir))
             return
 
         self.directoriesScanned += 1
         
         if folder.hasTrailer:
-            log.debug('Trailer found: {}'.format(folder.trailer.path))
+            log.debug('Skipping. Local trailer found: {}'.format(folder.trailer.path))
             self.trailersFound += 1
             return
 
+        # Search tmdb by info provided
         if (tmdbid or imdbid) or (title and year):
             self.tmdb.get_movie_details(tmdbid, imdbid, title, year)
+            # Parse apple links
             appleLinks = self.apple.getLinks(title, year)
+        
+        # Search tmdb by details collected from folder scan
         else:
             self.tmdb.get_movie_details(folder.tmdb, folder.imdb, folder.title, folder.year)
+            # Parse apple links
             appleLinks = self.apple.getLinks(folder.title, folder.year)
+
+        # Parse links from tmdb
         ytLinks = self.tmdb.get_trailer_links(config.languages, config.min_resolution)
         
         log.debug('Found {} trailer Links for "{}" ({}).'.format(len(appleLinks) + len(ytLinks), folder.title, folder.year))
 
         for link in appleLinks:
             if self.downloader.downloadApple(folder.trailerName, folder.trailerDirectory, link):
-                log.info('Downloaded trailer from {}'.format(link))
+                log.info('Downloaded trailer for "{}" ({}) from {}'.format(self.tmdb.title, self.tmdb.year, link))
                 self.trailersDownloaded.append(folder.trailerName)
                 return
             else:
@@ -79,13 +86,13 @@ class TrailerTech():
 
         for link in ytLinks:
             if self.downloader.downloadYouTube(folder.trailerName, folder.trailerDirectory, link):
-                log.warning('Downloaded trailer from {}'.format(link))
+                log.info('Downloaded trailer for "{}" ({}) from {}'.format(self.tmdb.title, self.tmdb.year, link))
                 self.trailersDownloaded.append(folder.trailerName)
                 return
             else:
                 log.info('Failed to download trailer for {} at {}'.format(folder.trailerDirectory, link))
 
-        log.info('No local trailer or downloaded trailers for "{}" ({})'.format(folder.title, folder.year))
+        log.info('No local or downloadable trailers for "{}" ({})'.format(folder.title, folder.year))
 
     def scanLibrary(self, directory):
         libraryDir = os.path.abspath(directory)

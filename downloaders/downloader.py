@@ -28,7 +28,7 @@ class Downloader():
             log.debug('Removed {}'.format(file_path))
 
     def _moveTo(self, source, destination):
-        log.debug('Moving {} to {}'.format(os.path.basename(source), os.path.dirname(destination)))
+        log.info('Download Complete Moving {} to {}'.format(os.path.basename(source), os.path.dirname(destination)))
         # check for destination directory
         if not os.path.isdir(os.path.dirname(destination)):
             log.warning('Failed to move {} ERROR: {} does not exist.'.format(os.path.basename(source), os.path.dirname(destination)))
@@ -59,28 +59,28 @@ class Downloader():
         'no_warnings': 'TRUE',
         'ignoreerrors': 'TRUE',
         'no_playlist': 'TRUE',
-        # 'logger': logger.get_log('YouTube-DL'),
+        'no_progress': 'TRUE',
+        'logger': logger.get_log('YouTube-DL'),
         'outtmpl': tempFilePath
         }
 
-        log.debug('Attempting to download video at "{}". Please Wait...'.format(link))
+        log.info('Attempting to download video: {} from "{}". Please Wait...'.format(fileName, link))
         try:
             with youtube_dl.YoutubeDL(options) as youtube:
                 youtube.extract_info(link, download=True)
         except Exception as e:
-            log.warning('Something went wrong while getting trailer. ERROR: {}'.format(e))
+            log.warning('Something went wrong while getting trailer from {}. ERROR: {}'.format(link, e))
             return False
 
         if os.path.isfile(tempFilePath):
-            log.info('Download complete!')
             self._moveTo(tempFilePath, destinationPath)
             return True
         else:
-            log.info('Download Failed.')
+            log.warning('Failed to download from {}'.format(link))
             return False
 
     def downloadApple(self, fileName, destinationDirectory, link):
-        log.debug('Attempting to download video at "{}". Please Wait...'.format(link))
+        log.info('Attempting to download video at "{}". Please Wait...'.format(link))
         tempPath = os.path.join(DL_DIRECTORY, fileName)
         destinationPath = os.path.join(destinationDirectory, fileName)
         headers = {'User-Agent': 'Quick_time/7.6.2'}
@@ -90,9 +90,9 @@ class Downloader():
                 if chunk: # filter out keep-alive new chunks
                     f.write(chunk)
                     f.flush()
-        log.info('Download complete!')
         if r.status_code == 200:
             self._moveTo(tempPath, destinationPath)
             return True
         else:
+            log.warning('Failed to download from {}.'.format(link))
             return False
