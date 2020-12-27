@@ -300,7 +300,7 @@ class MovieFolder():
                         self.trailer = video
                         log.debug('Trailer Found: {}'.format(self.trailer.fileName))
                     elif isMovie == None:
-                        log.warning('Could not determine if video is movie or trailer: {}'.format(video.fileName))
+                        log.warning('Could not determine if video is movie or trailer: {}'.format(video.path))
                 elif ext in NFO_EXTENSIONS:
                     nfo = NFO(item.path)
                     if (nfo.is_complete and not self._nfo) or (nfo.is_complete and nfo.fileSize > self._nfo.fileSize):
