@@ -51,7 +51,7 @@ fi
 ### Set permissions and install dependancies
 echo "********** Setting Permissions for TrailerTechnician **********"
 error=$(chown -R ${PUID}:${PGID} ${installDirectory} 2>&1) || { echo "Failed to set ownership on ${installDirectory}. ERROR: ${error}" ; }
-error=$(chmod -R ug+rwx ${installDirectory} 2>&1) || { echo "Failed to set permissions on ${installDirectory}. ERROR: ${error}" ; exit 1;}
+error=$(chmod -R 775 ${installDirectory} 2>&1) || { echo "Failed to set permissions on ${installDirectory}. ERROR: ${error}" ; exit 1;}
 
 echo "********** Installing TrailerTech Dependencies **********"
 error=$(python3 -m pip install -r ${requirementsFile} 2>&1) || { echo "Failed to install dependencies. ERROR: ${error}" ; exit 1; }
