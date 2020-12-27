@@ -8,6 +8,7 @@ from utils import logger
 
 log = logger.get_log(__name__)
 YOUTUBE_BASE_URL = 'https://www.youtube.com/watch?v='
+VIMEO_BASE_URL = 'https://vimeo.com/'
 
 class Tmdb(object):
     def __init__(self, api_key):
@@ -75,8 +76,12 @@ class Tmdb(object):
                 if not video['iso_639_1'] in languages:
                     log.debug('Filtered based on language. {}'.format(video['name']))
                     continue
-
-            video['link'] = '{}{}'.format(YOUTUBE_BASE_URL, video['key'])
+            
+            # Build link
+            if 'youtube' == video['site'].lower():
+                video['link'] = '{}{}'.format(YOUTUBE_BASE_URL, video['key'])
+            elif 'vimeo' == video['site'].lower():
+                video['link'] = '{}{}'.format(VIMEO_BASE_URL, video['key'])
 
             trailers.append(video)
         return [x['link'] for x in trailers]
