@@ -16,7 +16,7 @@ log = logger.get_log('TrailerTech')
 class TrailerTech():
     def __init__(self):
         self.directoriesScanned = 0
-        self.trailersDownloaded = 0
+        self.trailersDownloaded = []
         self.trailersFound = 0
         self.startTime = time.perf_counter()
         self.tmdb = Tmdb(config.tmdb_API_key)
@@ -25,7 +25,7 @@ class TrailerTech():
 
     def printStats(self):
         secondsElapsed = time.perf_counter() - self.startTime
-        missingTrailers = self.directoriesScanned - (self.trailersDownloaded + self.trailersFound)
+        missingTrailers = self.directoriesScanned - (len(self.trailersDownloaded) + self.trailersFound)
         statsStr = '''
         #################################################
         |   Stats:                                      |
@@ -34,7 +34,12 @@ class TrailerTech():
         |   Missing Trailers:          {}\t\t|
         |   Completed In:              {}s\t\t|
         #################################################
-        '''.format(self.directoriesScanned, self.trailersDownloaded, missingTrailers, int(secondsElapsed))
+        '''.format(self.directoriesScanned, len(self.trailersDownloaded), missingTrailers, int(secondsElapsed))
+        if len(self.trailersDownloaded) > 0:
+            statsStr += '\nNew Trailers:\n'
+        for trailer in self.trailersDownloaded:
+            statsStr += '{}\n'.format(trailer)
+        
         print(statsStr)
 
     def get_Trailer(self, movieDir, tmdbid=None, imdbid=None, title=None, year=None):
@@ -44,7 +49,7 @@ class TrailerTech():
 
         folder = MovieFolder(movieDir)
         if not folder.hasMovie:
-            log.warning('Unable to determin Movie file in: {}'.format(movieDir))
+            log.warning('Unable to determine Movie file in: {}'.format(movieDir))
             return
 
         self.directoriesScanned += 1
@@ -54,7 +59,6 @@ class TrailerTech():
             self.trailersFound += 1
             return
 
-        log.debug('No trailer found in "{}"'.format(folder.trailerDirectory))
         if (tmdbid or imdbid) or (title and year):
             self.tmdb.get_movie_details(tmdbid, imdbid, title, year)
             appleLinks = self.apple.getLinks(title, year)
@@ -63,25 +67,25 @@ class TrailerTech():
             appleLinks = self.apple.getLinks(folder.title, folder.year)
         ytLinks = self.tmdb.get_trailer_links(config.languages, config.min_resolution)
         
-        log.debug('Found {} trailer Links.'.format(len(appleLinks) + len(ytLinks)))
+        log.debug('Found {} trailer Links for "{}" ({}).'.format(len(appleLinks) + len(ytLinks), folder.title, folder.year))
 
         for link in appleLinks:
             if self.downloader.downloadApple(folder.trailerName, folder.trailerDirectory, link):
                 log.info('Downloaded trailer from {}'.format(link))
-                self.trailersDownloaded += 1
+                self.trailersDownloaded.append(folder.trailerName)
                 return
             else:
-                log.info('Failed to download trailer for {} at {}'.format(folder.trailerDirectory, link))
+                log.warning('Failed to download trailer for {} at {}'.format(folder.trailerDirectory, link))
 
         for link in ytLinks:
             if self.downloader.downloadYouTube(folder.trailerName, folder.trailerDirectory, link):
-                log.info('Downloaded trailer from {}'.format(link))
-                self.trailersDownloaded += 1
+                log.warning('Downloaded trailer from {}'.format(link))
+                self.trailersDownloaded.append(folder.trailerName)
                 return
             else:
                 log.info('Failed to download trailer for {} at {}'.format(folder.trailerDirectory, link))
 
-        log.info('No trailer found for "{}"'.format(folder.trailerDirectory))
+        log.info('No local trailer or downloaded trailers for "{}" ({})'.format(folder.title, folder.year))
 
     def scanLibrary(self, directory):
         libraryDir = os.path.abspath(directory)

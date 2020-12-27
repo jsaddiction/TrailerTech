@@ -59,7 +59,7 @@ class Downloader():
         'no_warnings': 'TRUE',
         'ignoreerrors': 'TRUE',
         'no_playlist': 'TRUE',
-        'logger': logger.get_log('YouTube-DL'),
+        # 'logger': logger.get_log('YouTube-DL'),
         'outtmpl': tempFilePath
         }
 
