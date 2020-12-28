@@ -52,14 +52,14 @@ class Downloader():
         destinationPath = os.path.join(destinationDirectory, fileName)
         options = {
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]',
-        'default_search': 'ytsearch1:',
-        'restrict_filenames': 'TRUE',
-        'prefer_ffmpeg': 'TRUE',
-        'quiet': 'TRUE',
-        'no_warnings': 'TRUE',
-        'ignoreerrors': 'TRUE',
-        'no_playlist': 'TRUE',
-        'no_progress': 'TRUE',
+        'default_search': 'auto',
+        'restrictfilenames': True,
+        'prefer_ffmpeg': True,
+        'quiet': True,
+        'no_warnings': True,
+        'ignoreerrors': True,
+        'noplaylist': True,
+        'noprogress': True,
         'logger': logger.get_log('YouTube-DL'),
         'outtmpl': tempFilePath
         }
