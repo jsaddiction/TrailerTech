@@ -138,7 +138,7 @@ class TrailerTech():
         # Check environment variables
         elif env.event == 'download' and env.movieDirectory:
             log.info('Called from Radarr Parsing "{}"'.format(env.movieDirectory))
-            self.get_Trailer(env.movieDirectory, env.tmdbid, env.imdbid, env.movieTitle, env.year) # parse imdb and tmdb from environment vars
+            self.get_Trailer(env.movieDirectory, env.tmdbid, env.imdbid, env.movieTitle, env.year)
 
             # Cleanup the temp download directory
             log.info('Cleaning up temp directory.')
