@@ -78,19 +78,13 @@ class TrailerTech():
 
         for link in appleLinks:
             if self.downloader.downloadApple(folder.trailerName, folder.trailerDirectory, link):
-                log.info('Downloaded trailer for "{}" ({}) from {}'.format(self.tmdb.title, self.tmdb.year, link))
                 self.trailersDownloaded.append(folder.trailerName)
                 return
-            else:
-                log.warning('Failed to download trailer for {} at {}'.format(folder.trailerDirectory, link))
 
         for link in ytLinks:
             if self.downloader.downloadYouTube(folder.trailerName, folder.trailerDirectory, link):
-                log.info('Downloaded trailer for "{}" ({}) from {}'.format(self.tmdb.title, self.tmdb.year, link))
                 self.trailersDownloaded.append(folder.trailerName)
                 return
-            else:
-                log.info('Failed to download trailer for {} at {}'.format(folder.trailerDirectory, link))
 
         log.info('No local or downloadable trailers for "{}" ({})'.format(folder.title, folder.year))
 
