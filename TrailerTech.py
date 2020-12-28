@@ -55,7 +55,7 @@ class TrailerTech():
         self.directoriesScanned += 1
         
         if folder.hasTrailer:
-            log.info('Skipping. Local trailer found: {}'.format(folder.trailer.path))
+            log.debug('Skipping. Local trailer found: {}'.format(folder.trailer.path))
             self.trailersFound += 1
             return
 
