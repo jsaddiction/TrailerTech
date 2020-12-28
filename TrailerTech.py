@@ -107,7 +107,7 @@ class TrailerTech():
             return
         log.info('Building list of directories to scan for trailers.')
         movieDirs = [os.path.join(libraryDir, subDir) for subDir in os.listdir(libraryDir) if os.path.isdir(os.path.join(libraryDir, subDir))]
-        log.info('Starting threads for {} movie directories.'.format(len(movieDirs)))
+        log.info('Initiating scan on {} movie directories.'.format(len(movieDirs)))
         with concurrent.futures.ThreadPoolExecutor(max_workers=None) as executer:
             executer.map(self.get_Trailer, movieDirs)
 
