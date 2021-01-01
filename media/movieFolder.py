@@ -10,7 +10,8 @@ try:
 except ImportError:
     import xml.etree.ElementTree as et
 
-MIN_MOVIE_DURATION = 600
+MIN_MOVIE_DURATION = 600  # In seconds
+MIN_TRAILER_SIZE = 500_000  # In bytes
 VIDEO_EXTENSIONS = ['.mkv', '.iso', '.wmv', '.avi', '.mp4', '.m4v', '.img', '.divx', '.mov', '.flv', '.m2ts']
 NFO_EXTENSIONS = ['.nfo', '.xml']
 ID_TAGS = ['imdb', 'tmdb', 'imdbid', 'tmdbid', 'tmdb_id', 'imdb_id', 'id']
@@ -32,9 +33,49 @@ class File():
     def fileSize(self):
         return os.path.getsize(self.path)
 
+    def delete(self):
+        try:
+            os.remove(self.path)
+        except OSError:
+            pass
+
 class Video(File):
     def __init__(self, path):
         super().__init__(path)
+
+    @property
+    def isCorrupt(self):
+        # skip if file not supported
+        if os.path.splitext(self.fileName)[-1] in ['.iso']:
+            return False
+
+        # if file is too small assume its corrupt
+        if self.fileSize < MIN_TRAILER_SIZE:
+            return True
+
+        result = subprocess.run([
+            'ffprobe', '-v', 'fatal', '-print_format', 
+            'json', '-show_format', '-show_streams', '-show_error',
+            self.path],
+            stdout=subprocess.PIPE
+            )
+
+        videoDetails = json.loads(result.stdout.decode())
+        returnCode = result.returncode
+        if returnCode != 0:
+            return True
+        if videoDetails.get('error'):
+            return True
+        if not videoDetails.get('streams'):
+            return True
+        
+        video_streams = [item for item in videoDetails['streams'] if item['codec_type'] == 'video']
+        audio_streams = [item for item in videoDetails['streams'] if item['codec_type'] == 'audio']
+        
+        if len(video_streams) > 0 and len(audio_streams) > 0:
+            return False
+        else:
+            return True
 
     @property
     def isMovie(self):
@@ -51,7 +92,6 @@ class Video(File):
         else:
             # Unable to determine duration assume its the movie since it doesn't have -trailer in file name
             return True
-
 
     def get_duration(self):
         result = subprocess.run([
@@ -209,7 +249,8 @@ class NFO(File):
         return None
 
 class MovieFolder():
-    def __init__(self, directory):
+    def __init__(self, directory, deleteCorruptTrailer=False):
+        self.deleteCorruptTrailer = deleteCorruptTrailer
         self.rootDir = os.path.abspath(directory)
         self.movie = None
         self.trailer = None
@@ -297,8 +338,12 @@ class MovieFolder():
                         self.movie = video
                         log.debug('Movie Found: {}'.format(self.movie.fileName))
                     elif isMovie == False:
-                        self.trailer = video
-                        log.debug('Trailer Found: {}'.format(self.trailer.fileName))
+                        if self.deleteCorruptTrailer and video.isCorrupt:
+                            log.warning('Deleting corrupt trailer {}'.format(self.trailer.fileName))
+                            video.delete()
+                        else:
+                            self.trailer = video
+                            log.debug('Trailer Found: {}'.format(self.trailer.fileName))
                     elif isMovie == None:
                         log.warning('Could not determine if video is movie or trailer: {}'.format(video.path))
                 elif ext in NFO_EXTENSIONS:

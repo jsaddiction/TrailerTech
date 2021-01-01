@@ -47,7 +47,7 @@ class TrailerTech():
             log.warning('Skipping. Invalid path: {}'.format(movieDir))
             return
 
-        folder = MovieFolder(movieDir)
+        folder = MovieFolder(movieDir, deleteCorruptTrailer=args.deleteCorrupt)
         if not folder.hasMovie:
             log.warning('Skipping. Unable to determine Movie file in: {}'.format(movieDir))
             return
