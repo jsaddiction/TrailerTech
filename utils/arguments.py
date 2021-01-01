@@ -8,8 +8,9 @@ def get_arguments(name, description, version):
     # Add basic arguments
     parser.add_argument('-v', '--version', action='version', version=version, help='Show the name and version number')
     parser.add_argument('-r', '--recursive', action='store_true', dest='recursive', help='Scan all directories within the path given', default=False)
-    parser.add_argument('--use_threads', action='store_true', dest='threads', help='Speed up scans with threading', default=False)
     parser.add_argument('-d', '--directory', metavar='directory', dest='directory', help='Directory to scan. Use -r flag to scan entire library.', default=None)
+    parser.add_argument('--use_threads', action='store_true', dest='threads', help='Speed up scans with threading', default=False)
+    parser.add_argument('--delete_corrupt', action='store_true', dest='deleteCorrupt', help='Remove trailers with corruption and replace', default=False)
 
     # Create argument groups
     title_year_group = parser.add_argument_group('Movie Title Year info')
