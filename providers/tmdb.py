@@ -59,7 +59,8 @@ class Tmdb(object):
         return False
 
     def get_trailer_links(self, languages=None, min_size=0):
-        trailers = []
+        if not self.videos:
+            return []
         for video in self.videos:
             # Filter based on type
             if not video['type'].lower() == 'trailer':
