@@ -17,6 +17,6 @@ LOG_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'TrailerTech
 env = Env()
 args = get_arguments(__appName__, __description__, __version__)
 config = Config(CONFIG_PATH)
-logger = Logger(LOG_PATH, config.log_level, config.log_to_file)
+logger = Logger(LOG_PATH, config.log_level, config.log_to_file, quiet=args.quiet)
 updater = Updater(logger.get_log('Updater'))
 updater.pull(check_dev=True)

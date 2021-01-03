@@ -28,7 +28,7 @@ class TrailerTech():
         missingTrailers = self.directoriesScanned - (len(self.trailersDownloaded) + self.trailersFound)
         statsStr = '''
         #################################################
-        |   Stats:                                      |
+        |   TrailerTech Stats:                          |
         |   Movie Directories Scanned: {}\t\t|
         |   Trailers Downloaded:       {}\t\t|
         |   Missing Trailers:          {}\t\t|
