@@ -27,13 +27,11 @@ class TrailerTech():
         secondsElapsed = time.perf_counter() - self.startTime
         missingTrailers = self.directoriesScanned - (len(self.trailersDownloaded) + self.trailersFound)
         statsStr = '''
-        #################################################
-        |   TrailerTech Stats:                          |
-        |   Movie Directories Scanned: {}\t\t|
-        |   Trailers Downloaded:       {}\t\t|
-        |   Missing Trailers:          {}\t\t|
-        |   Completed In:              {}s\t\t|
-        #################################################
+           TrailerTech Stats:
+           Movie Directories Scanned: {}
+           Trailers Downloaded:       {}
+           Missing Trailers:          {}
+           Completed In:              {}s
         '''.format(self.directoriesScanned, len(self.trailersDownloaded), missingTrailers, int(secondsElapsed))
         if len(self.trailersDownloaded) > 0:
             statsStr += '\nNew Trailers:\n'
