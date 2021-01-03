@@ -34,7 +34,7 @@ class Apple():
                 if int(res) > int(self.min_resolution):
                     # Filter by year and title
                     if 'releasedate' in result and 'title' in result:
-                        if year.lower() in result['releasedate'].lower() and self._matchTitle(title) == self._matchTitle(self._unescape(result['title'])):
+                        if str(year).lower() in result['releasedate'].lower() and self._matchTitle(title) == self._matchTitle(self._unescape(result['title'])):
                             if 'location' in result:
                                 if result['location'].startswith('/'):
                                     result['location'] = result['location'][1:]

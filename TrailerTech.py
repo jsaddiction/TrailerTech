@@ -50,7 +50,7 @@ class TrailerTech():
         folder = MovieFolder(movieDir, deleteCorruptTrailer=args.deleteCorrupt)
         if not folder.hasMovie:
             log.warning('Skipping. Unable to determine Movie file in: {}'.format(movieDir))
-            return
+            # return
 
         self.directoriesScanned += 1
         

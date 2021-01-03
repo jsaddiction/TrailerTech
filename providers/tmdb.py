@@ -59,8 +59,9 @@ class Tmdb(object):
         return False
 
     def get_trailer_links(self, languages=None, min_size=0):
+        trailers = []
         if not self.videos:
-            return []
+            return trailers
         for video in self.videos:
             # Filter based on type
             if not video['type'].lower() == 'trailer':
@@ -151,7 +152,7 @@ class Tmdb(object):
             return False
 
         for result in response['results']:
-            if year in result['release_date'] and result['title'].lower() == title.lower():
+            if str(year) in result['release_date'] and result['title'].lower() == title.lower():
                 return result['id']
 
     def _handle_error(self, error):
