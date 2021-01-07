@@ -84,15 +84,19 @@ class Downloader():
         tempPath = os.path.join(DL_DIRECTORY, fileName)
         destinationPath = os.path.join(destinationDirectory, fileName)
         headers = {'User-Agent': 'Quick_time/7.6.2'}
-        r = requests.get(link, stream=True, headers=headers)
-        with open(tempPath, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=1024): 
-                if chunk: # filter out keep-alive new chunks
-                    f.write(chunk)
-                    f.flush()
-        if r.status_code == 200:
-            self._moveTo(tempPath, destinationPath)
-            return True
-        else:
-            log.warning('Failed to download from {}.'.format(link))
+
+        try:
+            with requests.get(link, stream=True, headers=headers, timeout=5) as response:
+                response.raise_for_status()
+                with open(tempPath, 'wb') as tempFile:
+                    for chunk in response.iter_content(chunk_size=1024 * 1024):
+                        tempFile.write(chunk)
+
+        except requests.exceptions.HTTPError as e:
+            log.warning('Encountered an HTTP error while downloading from: {} ERROR: {}'.format(link, e))
             return False
+        except IOError as e:
+            log.warning('Encountered an error while writing to disk. File: {} ERROR: {}'.format(tempPath, e))
+            return False
+
+        self._moveTo(tempPath, destinationPath)        
