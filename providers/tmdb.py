@@ -8,7 +8,7 @@ from utils import logger
 log = logger.get_log(__name__)
 YOUTUBE_BASE_URL = 'https://www.youtube.com/watch?v='
 VIMEO_BASE_URL = 'https://vimeo.com/'
-TMDB_API =  None #'28c936c57b653df80585b30667c1aa2d'
+TMDB_API = '28c936c57b653df80585b30667c1aa2d'
 
 class Tmdb(object):
     def __init__(self, api_key=None):
