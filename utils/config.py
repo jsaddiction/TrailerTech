@@ -47,8 +47,8 @@ class Config(object):
     def tmdb_API_key(self):
         if not self._raw_config is None:
             if 'TMDB' in self._raw_config.sections():
-                return self._raw_config['TMDB'].get('api_key', '')
-        return ''
+                return self._raw_config['TMDB'].get('api_key', None)
+        return None
 
     @property
     def languages(self):

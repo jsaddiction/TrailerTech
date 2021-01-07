@@ -8,15 +8,19 @@ from utils import logger
 log = logger.get_log(__name__)
 YOUTUBE_BASE_URL = 'https://www.youtube.com/watch?v='
 VIMEO_BASE_URL = 'https://vimeo.com/'
+TMDB_API =  None #'28c936c57b653df80585b30667c1aa2d'
 
 class Tmdb(object):
-    def __init__(self, api_key):
+    def __init__(self, api_key=None):
         self.data = None
-        tmdb.API_KEY = api_key
+        if not api_key:
+            tmdb.API_KEY = TMDB_API
+        else:
+            tmdb.API_KEY = api_key
 
     @property
     def hasAPIkey(self):
-        return not tmdb.API_KEY == ''
+        return not tmdb.API_KEY == None
 
     @property
     def title(self):

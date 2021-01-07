@@ -112,7 +112,7 @@ class TrailerTech():
     def main(self):
         log.info('Starting TrailerTech')
         if not self.tmdb.hasAPIkey:
-            log.critical('No TMDB API key was set in settings.ini Aborting all operations.')
+            log.critical('No TMDB API key was found, try adding one to settings.ini Aborting all operations.')
             sys.exit(0)
         # Check if any args were parsed from user
         if args.directory:
