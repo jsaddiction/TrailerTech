@@ -74,15 +74,17 @@ class TrailerTech():
         
         log.debug('Found {} trailer Links for "{}" ({}).'.format(len(appleLinks) + len(ytLinks), folder.title, folder.year))
 
-        for link in appleLinks:
-            if self.downloader.downloadApple(folder.trailerName, folder.trailerDirectory, link):
-                self.trailersDownloaded.append(folder.trailerName)
-                return
+        if config.apple_enabled:
+            for link in appleLinks:
+                if self.downloader.downloadApple(folder.trailerName, folder.trailerDirectory, link):
+                    self.trailersDownloaded.append(folder.trailerName)
+                    return
 
-        for link in ytLinks:
-            if self.downloader.downloadYouTube(folder.trailerName, folder.trailerDirectory, link):
-                self.trailersDownloaded.append(folder.trailerName)
-                return
+        if config.youtube_enabled:
+            for link in ytLinks:
+                if self.downloader.downloadYouTube(folder.trailerName, folder.trailerDirectory, link):
+                    self.trailersDownloaded.append(folder.trailerName)
+                    return
 
         log.info('No local or downloadable trailers for "{}" ({})'.format(folder.title, folder.year))
 
