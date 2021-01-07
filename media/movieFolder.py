@@ -5,7 +5,7 @@ import json
 import subprocess
 import re
 from datetime import datetime
-from TrailerTech.utils import logger
+from utils import logger
 try:
     import xml.etree.cElementTree as et
 except ImportError:

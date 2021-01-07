@@ -3,7 +3,7 @@
 import tmdbsimple as tmdb
 from requests import HTTPError
 from datetime import datetime
-from TrailerTech.utils import logger
+from utils import logger
 
 log = logger.get_log(__name__)
 YOUTUBE_BASE_URL = 'https://www.youtube.com/watch?v='
