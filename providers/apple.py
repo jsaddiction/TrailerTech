@@ -9,7 +9,7 @@ import unicodedata
 from unidecode import unidecode
 # from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
-from utils import logger
+from TrailerTech.utils import logger
 
 trailer_url = 'https://trailers.apple.com/'
 search_url = 'https://trailers.apple.com/trailers/home/scripts/quickfind.php?q='
