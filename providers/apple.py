@@ -6,44 +6,99 @@ import json
 import socket
 import html.parser
 import unicodedata
+import requests
 from unidecode import unidecode
-# from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 from utils import logger
 
 trailer_url = 'https://trailers.apple.com/'
-search_url = 'https://trailers.apple.com/trailers/home/scripts/quickfind.php?q='
+moviePage_url = 'https://trailers.apple.com/'
+# search_url = 'https://trailers.apple.com/trailers/home/scripts/quickfind.php?q='
+search_url = 'https://trailers.apple.com/trailers/home/scripts/quickfind.php'
 log = logger.get_log(__name__)
 resolutions = ['1080', '720', '480']
 
 class Apple():
-    def __init__(self, min_resolution):
-        self.min_resolution = min_resolution
+    def __init__(self, min_resolution, max_resolution):
+        self.min_resolution = int(min_resolution)
+        self.max_resolution = int(max_resolution)
 
-    def getLinks(self, title, year):
-        links = []
-        query = self._removeSpecialChars(title)
-        query = self._removeAccents(query)
-        query = query.replace(' ', '+')
-        search_url = 'https://trailers.apple.com/trailers/home/scripts/quickfind.php?q='+query
-        search = self._loadJson(search_url)
+    def _getJson(self, url, params=None):
+        try:
+            with requests.get(url, params=params, timeout=5) as r:
+                r.raise_for_status()
+                result = r.json()
+                result['url'] = r.url
+                return result
+        except ValueError:
+            log.warning('Failed to parse data returned from Apple. url: {} response:{}'.format(url, r.text))
+            return None
+        except requests.exceptions.Timeout:
+            log.warning('Timed out while connecting to {}'.format(url))
+            return None
+        except ConnectionError as e:
+            log.warning('Failed to connect to {} Error: {}'.format(url, e))
+            return None
+        except requests.exceptions.HTTPError as e:
+            log.warning('Apple search failed for "{}". {}'.format(url, e))
+            return None
 
-         # Parse search results
-        for result in search['results']:
-            for res in resolutions:
-                if int(res) > int(self.min_resolution):
-                    # Filter by year and title
-                    if 'releasedate' in result and 'title' in result:
-                        if str(year).lower() in result['releasedate'].lower() and self._matchTitle(title) == self._matchTitle(self._unescape(result['title'])):
-                            if 'location' in result:
-                                if result['location'].startswith('/'):
-                                    result['location'] = result['location'][1:]
-                                if result['location'].endswith('/'):
-                                    result['location'] = result['location'][:-1]
-                            urls = [x['url'] for x in self._getUrls(trailer_url+result['location'], res)]
-                            if len(urls) > 0:
-                                links.extend(urls)
-        return links
+    def getLinks2(self, title, year):
+        urls = []
+
+        # search for movies
+        movies = self._getJson(search_url, params={'q': title})
+
+        # ensure we don't have errors
+        if movies.get('error') == True:
+            log.warning('Apple returned an error in its response. Response: {}'.format(movies))
+            return urls
+
+        # ensure we have at least one result to parse
+        if not len(movies.get('results')) > 0:
+            log.warning('Apple returned no results for "{}"'.format(title))
+            return urls
+
+
+        # Get all movies that title and year match
+        for movie in movies.get('results'):
+            if title.lower() == movie.get('title').lower() and str(year) in movie.get('releasedate'):
+                location = movie.get('location', None)
+
+        # check if we have a movie page
+        if not location:
+            log.warning('No movie details parsed from Apple search. url: {}'.format(movies['url']))
+            return urls
+
+        # Get Movie data
+        log.info(moviePage_url + location + '/data/page.json')
+        movieData = self._getJson(moviePage_url + location + '/data/page.json')
+
+        # Collect all trailer links
+        links =[]
+        for clip in movieData['clips']:
+            if 'trailer' in clip['title'].lower():
+                for item in clip['versions']['enus']['sizes']:
+                    if int(clip['versions']['enus']['sizes'][item]['height']) >= self.min_resolution:
+                        if int(clip['versions']['enus']['sizes'][item]['height']) <= self.max_resolution:
+                            links.append({
+                                'url': clip['versions']['enus']['sizes'][item]['src'],
+                                'height': clip['versions']['enus']['sizes'][item]['height'],
+                                'width': clip['versions']['enus']['sizes'][item]['width'],
+                                })
+                            links.append({
+                                'url': clip['versions']['enus']['sizes'][item]['srcAlt'],
+                                'height': clip['versions']['enus']['sizes'][item]['height'],
+                                'width': clip['versions']['enus']['sizes'][item]['width'],
+                                })
+                        else:
+                            log.info('Too Big {}'.format(int(clip['versions']['enus']['sizes'][item]['height'])))
+                    else:
+                        log.info('Too small {}'.format(int(clip['versions']['enus']['sizes'][item]['height'])))
+
+        links.sort(reverse=True, key=lambda link: link['height'])
+
+        return [link['url'] for link in links]
 
     # Match titles
     def _matchTitle(self, title):
@@ -111,3 +166,28 @@ class Apple():
             return final
         else:
             return urls
+
+    def getLinks(self, title, year):
+            links = []
+            query = self._removeSpecialChars(title)
+            query = self._removeAccents(query)
+            query = query.replace(' ', '+')
+            search_url = 'https://trailers.apple.com/trailers/home/scripts/quickfind.php?q='+query
+            search = self._loadJson(search_url)
+
+            # Parse search results
+            for result in search['results']:
+                for res in resolutions:
+                    if int(res) > int(self.min_resolution):
+                        # Filter by year and title
+                        if 'releasedate' in result and 'title' in result:
+                            if str(year).lower() in result['releasedate'].lower() and self._matchTitle(title) == self._matchTitle(self._unescape(result['title'])):
+                                if 'location' in result:
+                                    if result['location'].startswith('/'):
+                                        result['location'] = result['location'][1:]
+                                    if result['location'].endswith('/'):
+                                        result['location'] = result['location'][:-1]
+                                urls = [x['url'] for x in self._getUrls(trailer_url+result['location'], res)]
+                                if len(urls) > 0:
+                                    links.extend(urls)
+            return links
