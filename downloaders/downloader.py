@@ -105,3 +105,9 @@ class Downloader():
         if self._moveTo(tempPath, destinationPath):
             self.cleanUp()
             return True
+
+    def download(self, fileName, destinationDirectory, link):
+        if 'apple' in link.lower():
+            return self.downloadApple(fileName, destinationDirectory, link)
+        elif 'youtube' in link.lower() or 'vimeo' in link.lower():
+            return self.downloadYouTube(fileName, destinationDirectory, link)

@@ -11,7 +11,10 @@ VIMEO_BASE_URL = 'https://vimeo.com/'
 TMDB_API = '28c936c57b653df80585b30667c1aa2d'
 
 class Tmdb(object):
-    def __init__(self, api_key=None):
+    def __init__(self, min_resolution, max_resolution, languages, api_key=None):
+        self.min_resolution = min_resolution
+        self.max_resolution = max_resolution
+        self.languages = languages
         self.data = None
         if not api_key:
             tmdb.API_KEY = TMDB_API
@@ -60,6 +63,41 @@ class Tmdb(object):
         if not self.videos == None:
             return True
         return False
+
+    def getLinks(self):
+        links = []
+
+        # return empty list if no movie details or videos exist
+        if not self.data or not self.videos:
+            return links
+
+        # Filter videos 
+        for video in self.videos:
+            # Filter based on type
+            if not video['type'].lower() == 'trailer':
+                log.debug('Filtered based on type. {}'.format(video['name']))
+                continue
+
+            # Filter based on size
+            if not int(self.min_resolution) <= int(video['size']) or not int(self.max_resolution) >= int(video['size']):
+                log.debug('Filtered based on size. {}'.format(video['name']))
+                continue
+
+            # Filter based on language
+            if not video['iso_639_1'] in self.languages:
+                log.debug('Filtered based on language. {}'.format(video['name']))
+                continue
+            
+            # Build link
+            trailer = {}
+            if 'youtube' == video['site'].lower():
+                trailer['url'] = '{}{}'.format(YOUTUBE_BASE_URL, video['key'])
+            elif 'vimeo' == video['site'].lower():
+                trailer['url'] = '{}{}'.format(VIMEO_BASE_URL, video['key'])
+            trailer['height'] = int(video['size'])
+
+            links.append(trailer)
+        return links
 
     def get_trailer_links(self, languages=None, min_size=0):
         trailers = []
@@ -112,6 +150,7 @@ class Tmdb(object):
         except HTTPError as e:
             self._handle_error(e)
             return None
+        return True
 
     def __get_movie(self, tmdbid):
         try:

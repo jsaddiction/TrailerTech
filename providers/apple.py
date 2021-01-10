@@ -89,13 +89,10 @@ class Apple():
                         if int(clip['versions']['enus']['sizes'][item]['height']) <= self.max_resolution:
                             links.append({
                                 'url': clip['versions']['enus']['sizes'][item]['src'],
-                                'height': clip['versions']['enus']['sizes'][item]['height'],
+                                'height': int(clip['versions']['enus']['sizes'][item]['height']),
                                 })
                             links.append({
                                 'url': clip['versions']['enus']['sizes'][item]['srcAlt'],
-                                'height': clip['versions']['enus']['sizes'][item]['height'],
+                                'height': int(clip['versions']['enus']['sizes'][item]['height']),
                                 })
-
-        links.sort(reverse=True, key=lambda link: link['height'])
-
-        return [link['url'] for link in links]
+        return links
