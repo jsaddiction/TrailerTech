@@ -87,6 +87,7 @@ class TrailerTech():
         # send them to the downloader
         for link in links:
             if self.downloader.download(folder.trailerName, folder.trailerDirectory, link['url']):
+                self.trailersDownloaded.append(folder.trailerName)
                 return
         
         log.info('No local or downloadable trailers for "{}" ({})'.format(folder.title, folder.year))
