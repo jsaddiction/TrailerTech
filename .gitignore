@@ -16,6 +16,7 @@ TrailerTech.log.*
 # VSCode
 .vscode/
 .devenv
+test.py
 
 # Distribution / packaging
 .Python

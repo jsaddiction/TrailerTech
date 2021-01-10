@@ -88,6 +88,9 @@ class Downloader():
         try:
             with requests.get(link, stream=True, headers=headers, timeout=5) as response:
                 response.raise_for_status()
+                if int(response.headers.get('Content-length')) < 1000000:
+                    log.warning('File too small. URL: {} Content-Length: {}'.format(link, response.headers.get('Content-Length')))
+                    return False
                 with open(tempPath, 'wb') as tempFile:
                     for chunk in response.iter_content(chunk_size=1024 * 1024):
                         tempFile.write(chunk)
@@ -99,4 +102,6 @@ class Downloader():
             log.warning('Encountered an error while writing to disk. File: {} ERROR: {}'.format(tempPath, e))
             return False
 
-        self._moveTo(tempPath, destinationPath)        
+        if self._moveTo(tempPath, destinationPath):
+            self.cleanUp()
+            return True
