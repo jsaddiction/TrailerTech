@@ -20,7 +20,7 @@ class TrailerTech():
         self.trailersFound = 0
         self.startTime = time.perf_counter()
         self.tmdb = Tmdb(config.tmdb_API_key)
-        self.apple = Apple(config.min_resolution)
+        self.apple = Apple(config.min_resolution, config.max_resolution)
         self.downloader = Downloader()
 
     def printStats(self):
