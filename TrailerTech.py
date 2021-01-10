@@ -19,7 +19,7 @@ class TrailerTech():
         self.trailersDownloaded = []
         self.trailersFound = 0
         self.startTime = time.perf_counter()
-        self.tmdb = Tmdb(config.tmdb_API_key)
+        self.tmdb = Tmdb(config.min_resolution, config.max_resolution, config.languages, config.tmdb_API_key)
         self.apple = Apple(config.min_resolution, config.max_resolution)
         self.downloader = Downloader()
 
@@ -41,51 +41,54 @@ class TrailerTech():
         print(statsStr)
 
     def get_Trailer(self, movieDir, tmdbid=None, imdbid=None, title=None, year=None):
+        links = []
+        # Check for invalid directory
         if not os.path.isdir(os.path.abspath(movieDir)):
             log.warning('Skipping. Invalid path: {}'.format(movieDir))
             return
 
+        # Parse movie folder. skip if no movies found
         folder = MovieFolder(movieDir, deleteCorruptTrailer=args.deleteCorrupt)
         if not folder.hasMovie:
             log.warning('Skipping. Unable to determine Movie file in: {}'.format(movieDir))
-            # return
+            return
 
         self.directoriesScanned += 1
         
+        # skip if trailer already exists
         if folder.hasTrailer:
             log.debug('Skipping. Local trailer found: {}'.format(folder.trailer.path))
             self.trailersFound += 1
             return
 
-        # Search tmdb by info provided
+        # If user provided data parse that info
         if (tmdbid or imdbid) or (title and year):
-            self.tmdb.get_movie_details(tmdbid, imdbid, title, year)
-            # Parse apple links
-            appleLinks = self.apple.getLinks(title, year)
+            if self.tmdb.get_movie_details(tmdbid, imdbid, title, year):
+                if config.apple_enabled:
+                    links.extend(self.apple.getLinks(self.tmdb.title, self.tmdb.year))
+                if config.youtube_enabled:
+                    links.extend(self.tmdb.getLinks())
+            else:
+                return
         
-        # Search tmdb by details collected from folder scan
+        # Otherwise use movie folder data
         else:
-            self.tmdb.get_movie_details(folder.tmdb, folder.imdb, folder.title, folder.year)
-            # Parse apple links
-            appleLinks = self.apple.getLinks(folder.title, folder.year)
+            if config.apple_enabled:
+                links.extend(self.apple.getLinks(folder.title, folder.year))
+            if config.youtube_enabled:
+                if self.tmdb.get_movie_details(folder.tmdb, folder.imdb, folder.title, folder.year):
+                    links.extend(self.tmdb.getLinks())
 
-        # Parse links from tmdb
-        ytLinks = self.tmdb.get_trailer_links(config.languages, config.min_resolution)
+        # sort links we have based on height values
+        links.sort(reverse=True, key=lambda link: link['height'])
+
+        log.debug('Found {} trailer Links for "{}" ({}).'.format(len(links), folder.title, folder.year))
+
+        # send them to the downloader
+        for link in links:
+            if self.downloader.download(folder.trailerName, folder.trailerDirectory, link['url']):
+                return
         
-        log.debug('Found {} trailer Links for "{}" ({}).'.format(len(appleLinks) + len(ytLinks), folder.title, folder.year))
-
-        if config.apple_enabled:
-            for link in appleLinks:
-                if self.downloader.downloadApple(folder.trailerName, folder.trailerDirectory, link):
-                    self.trailersDownloaded.append(folder.trailerName)
-                    return
-
-        if config.youtube_enabled:
-            for link in ytLinks:
-                if self.downloader.downloadYouTube(folder.trailerName, folder.trailerDirectory, link):
-                    self.trailersDownloaded.append(folder.trailerName)
-                    return
-
         log.info('No local or downloadable trailers for "{}" ({})'.format(folder.title, folder.year))
 
     def scanLibrary(self, directory):
