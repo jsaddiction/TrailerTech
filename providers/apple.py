@@ -1,29 +1,53 @@
 #!/usr/bin/env python3
 
-import os
-import shutil
-import json
-import socket
-import html.parser
-import unicodedata
 import requests
-from unidecode import unidecode
-from urllib.request import Request, urlopen
+import socket
 from utils import logger
 
-trailer_url = 'https://trailers.apple.com/'
 moviePage_url = 'https://trailers.apple.com/'
-# search_url = 'https://trailers.apple.com/trailers/home/scripts/quickfind.php?q='
-search_url = 'https://trailers.apple.com/trailers/home/scripts/quickfind.php'
+movieSearch_url = 'https://trailers.apple.com/trailers/home/scripts/quickfind.php'
 log = logger.get_log(__name__)
-resolutions = ['1080', '720', '480']
 
 class Apple():
     def __init__(self, min_resolution, max_resolution):
         self.min_resolution = int(min_resolution)
         self.max_resolution = int(max_resolution)
 
-    # New
+    def _getMoivePage(self, title, year):
+        movies = self._getJson(movieSearch_url, params={'q': title})
+
+        if not movies:
+            return False
+
+        if movies.get('error', True) == True:
+            log.debug('Apple could not find the movie "{}" url: {}'.format(title, movies['url']))
+            return False
+
+        if not 'results' in movies or len(movies.get('results')) < 1:
+            log.debug('Apple returned no results for "{}" url: {}'.format(title, movies['url']))
+            return False
+
+        # find matching movie in results
+        location = None
+        for movie in movies.get('results'):
+            if title.lower() == movie.get('title', '').lower() and str(year) in movie.get('releasedate', ''):
+                    location = movie.get('location', None)
+                    break
+        
+        # check if we found the right movie
+        if not location:
+            return False
+
+        # build and get data for movie
+        url = requests.compat.urljoin(moviePage_url, location + '/data/page.json')
+        log.debug('Getting movie data from url: {}'.format(url))
+        movieData = self._getJson(url)
+
+        if not movieData:
+            return False
+
+        return movieData
+
     def _getJson(self, url, params=None):
         try:
             with requests.get(url, params=params, timeout=5) as r:
@@ -32,60 +56,32 @@ class Apple():
                 result['url'] = r.url
                 return result
         except ValueError:
-            log.warning('Failed to parse data returned from Apple. url: {} response:{}'.format(url, r.text))
+            log.debug('Failed to parse data returned from Apple. url: {} response:{}'.format(r.url, r.text))
             return None
         except requests.exceptions.Timeout:
             log.warning('Timed out while connecting to {}'.format(url))
             return None
-        except ConnectionError as e:
+        except requests.exceptions.ConnectionError as e:
             log.warning('Failed to connect to {} Error: {}'.format(url, e))
             return None
         except requests.exceptions.HTTPError as e:
-            log.warning('Apple search failed for "{}". {}'.format(url, e))
+            log.warning('Apple search failed for {} Error: {}'.format(url, e))
+            return None
+        except requests.exceptions.RequestException as e:
+            log.warning('Unknown error: {}'.format(e))
             return None
 
-    # New
     def getLinks(self, title, year):
-        urls = []
+        links =[]
 
-        # search for movies
-        movies = self._getJson(search_url, params={'q': title})
-        log.warning(movies['url'])
+        # Get movie page data
+        movieData = self._getMoivePage(title, year)
 
-        if not movies:
-            return urls
-
-        # ensure we don't have errors
-        if movies.get('error', True) == True:
-            log.warning('Apple returned an error in its response. Response: {}'.format(movies))
-            return urls
-
-        # ensure we have at least one result to parse
-        if not len(movies.get('results')) > 0:
-            return urls
-
-
-        # Get all movies that title and year match
-        for movie in movies.get('results'):
-            if title.lower() == movie.get('title').lower():
-                if str(year) in movie.get('releasedate'):
-                    location = movie.get('location', None)
-                else:
-                    log.warning('{} not in {}'.format(year, movie.get('releasedate')))
-                    location = None
-            else:
-                log.warning('{} != {}'.format(title, movie.get('title')))
-                location = None
-
-        # check if we have a movie page
-        if not location:
-            return urls
-
-        # Get Movie data
-        movieData = self._getJson(moviePage_url + location + '/data/page.json')
+        # return empty list if no movie page was found
+        if not movieData:
+            return links
 
         # Collect all trailer links
-        links =[]
         for clip in movieData['clips']:
             if 'trailer' in clip['title'].lower():
                 for item in clip['versions']['enus']['sizes']:
