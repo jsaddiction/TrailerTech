@@ -15,6 +15,15 @@ class Logger():
         self._log_path = log_path
         self._quiet = quiet
 
+    def get_null_log(self, name):
+        log = logging.getLogger(name)
+        log.setLevel(self._log_level)
+        nh = logging.NullHandler()
+        nh.setFormatter(self._format)
+        nh.setLevel(50)
+        log.addHandler(nh)
+        return log
+
     def get_log(self, name):
         log = logging.getLogger(name)
         log.setLevel(self._log_level)
