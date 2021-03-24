@@ -14,7 +14,7 @@ requirementsFile="${installDirectory}/requirements.txt"
 ## ubuntu/ Debian based part
 if [[ -n "$(command -v apt-get)" ]]; then
    apt update -yq
-   install="git python3 python3 ffmpeg"
+   install="git python3 python3-pip ffmpeg"
    for i in ${install}; do
        echo "********** INSTALLING $i **********"
        apt install $i -yq
@@ -24,7 +24,7 @@ fi
 if [[ -n "$(command -v apk)" ]]; then
    apk -qU --no-cache update
    apk -qU --no-cache upgrade
-   install="git python3 python3 ffmpeg"
+   install="git python3 python3-pip ffmpeg"
    for i in ${install}; do
        echo "********** INSTALLING $i **********"
        apk -qU --no-cache --no-progres add $i
