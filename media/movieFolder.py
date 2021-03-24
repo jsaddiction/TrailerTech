@@ -12,7 +12,7 @@ except ImportError:
     import xml.etree.ElementTree as et
 
 MIN_MOVIE_DURATION = 600  # In seconds
-MIN_TRAILER_SIZE = 500_000  # In bytes
+MIN_TRAILER_SIZE = 500000  # In bytes
 VIDEO_EXTENSIONS = ['.mkv', '.iso', '.wmv', '.avi', '.mp4', '.m4v', '.img', '.divx', '.mov', '.flv', '.m2ts']
 NFO_EXTENSIONS = ['.nfo', '.xml']
 ID_TAGS = ['imdb', 'tmdb', 'imdbid', 'tmdbid', 'tmdb_id', 'imdb_id', 'id']
