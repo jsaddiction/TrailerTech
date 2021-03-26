@@ -87,3 +87,10 @@ class Config(object):
             if 'APPLE' in self._raw_config.sections():
                 return self._raw_config['APPLE'].getboolean('enabled', True)
         return True
+
+    @property
+    def perferred_source(self):
+        if not self._raw_config is None:
+            if 'TRAILERS' in self._raw_config.sections():
+                return self._raw_config['TRAILERS'].get('perferred_source', 'apple').lower()
+        return 'apple'
