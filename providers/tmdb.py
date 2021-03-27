@@ -95,6 +95,7 @@ class Tmdb(object):
             elif 'vimeo' == video['site'].lower():
                 trailer['url'] = '{}{}'.format(VIMEO_BASE_URL, video['key'])
             trailer['height'] = int(video['size'])
+            trailer['source'] = 'youtube'
 
             links.append(trailer)
         return links

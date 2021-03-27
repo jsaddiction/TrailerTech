@@ -90,9 +90,11 @@ class Apple():
                             links.append({
                                 'url': clip['versions']['enus']['sizes'][item]['src'],
                                 'height': int(clip['versions']['enus']['sizes'][item]['height']),
+                                'source': 'apple'
                                 })
                             links.append({
                                 'url': clip['versions']['enus']['sizes'][item]['srcAlt'],
                                 'height': int(clip['versions']['enus']['sizes'][item]['height']),
+                                'source': 'apple'
                                 })
         return links
