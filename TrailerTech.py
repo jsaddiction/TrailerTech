@@ -79,8 +79,12 @@ class TrailerTech():
                 if self.tmdb.get_movie_details(folder.tmdb, folder.imdb, folder.title, folder.year):
                     links.extend(self.tmdb.getLinks())
 
-        # sort links we have based on height values
+        # sort by source; reverse=True = prefer youtube-dl
+        links.sort(reverse=config.perferred_source == 'youtube', key=lambda link: link['source'])
+
+        # sort by height; reverse=True = prefer higher definition
         links.sort(reverse=True, key=lambda link: link['height'])
+
 
         log.debug('Found {} trailer Links for "{}" ({}).'.format(len(links), folder.title, folder.year))
 

@@ -6,6 +6,7 @@ log_to_file=false
 api_key=
 
 [TRAILERS]
+preferred_source=apple
 min_resolution=480
 max_resolution=1080
 languages=en
