@@ -85,16 +85,31 @@ class Apple():
         for clip in movieData['clips']:
             if 'trailer' in clip['title'].lower():
                 for item in clip['versions']['enus']['sizes']:
-                    if int(clip['versions']['enus']['sizes'][item]['height']) >= self.min_resolution:
-                        if int(clip['versions']['enus']['sizes'][item]['height']) <= self.max_resolution:
-                            links.append({
-                                'url': clip['versions']['enus']['sizes'][item]['src'],
-                                'height': int(clip['versions']['enus']['sizes'][item]['height']),
-                                'source': 'apple'
-                                })
-                            links.append({
-                                'url': clip['versions']['enus']['sizes'][item]['srcAlt'],
-                                'height': int(clip['versions']['enus']['sizes'][item]['height']),
-                                'source': 'apple'
-                                })
+                    height = int(clip['versions']['enus']['sizes'][item]['height'])
+                    try:
+                        stdSize = int(item.replace('hd', ''))
+                    except ValueError:
+                        stdSize = 480
+                    
+                    if '720p' in clip['versions']['enus']['sizes'][item]['srcAlt']:
+                        altSize = 720
+                    elif '1080p' in clip['versions']['enus']['sizes'][item]['srcAlt']:
+                        altSize = 1080
+                    else:
+                        altSize = 480
+
+                    # Filter based on clip height
+                    if height >= self.min_resolution and height <= self.max_resolution:
+
+                        # Parse clip into links
+                        links.append({
+                            'url': clip['versions']['enus']['sizes'][item]['src'],
+                            'height': stdSize,
+                            'source': 'apple'
+                            })
+                        links.append({
+                            'url': clip['versions']['enus']['sizes'][item]['srcAlt'],
+                            'height': altSize,
+                            'source': 'apple'
+                            })
         return links

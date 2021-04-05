@@ -87,6 +87,8 @@ class TrailerTech():
 
 
         log.debug('Found {} trailer Links for "{}" ({}).'.format(len(links), folder.title, folder.year))
+        for link in links:
+            log.debug('Source: {}, Size: {}, link: {}'.format(link['source'], link['height'], link['url']))
 
         # send them to the downloader
         for link in links:
