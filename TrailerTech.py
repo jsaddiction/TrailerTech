@@ -5,7 +5,7 @@ import os
 import concurrent.futures
 import time
 
-from utils import config, logger, env, updater, args
+from utils import config, logger, env, args
 from media.movieFolder import MovieFolder
 from providers.tmdb import Tmdb
 from providers.apple import Apple

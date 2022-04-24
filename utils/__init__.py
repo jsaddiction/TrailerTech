@@ -3,7 +3,6 @@
 import os
 from utils.logger import Logger
 from utils.config import Config
-from utils.updater import Updater
 from utils.environment import Env
 from utils.arguments import get_arguments
 
@@ -18,5 +17,3 @@ env = Env()
 args = get_arguments(__appName__, __description__, __version__)
 config = Config(CONFIG_PATH)
 logger = Logger(LOG_PATH, config.log_level, config.log_to_file, quiet=args.quiet)
-updater = Updater(logger.get_log('Updater'))
-updater.pull(check_dev=True)

@@ -13,6 +13,9 @@ settings.ini
 TrailerTech.log
 TrailerTech.log.*
 
+# test scripts
+test.py
+
 # VSCode
 .vscode/
 .devenv
