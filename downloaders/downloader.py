@@ -2,7 +2,7 @@
 
 import os
 import shutil
-import youtube_dl
+import yt_dlp
 import requests
 
 from utils import logger
@@ -66,7 +66,7 @@ class Downloader():
 
         log.info('Attempting to download video: {} from "{}". Please Wait...'.format(fileName, link))
         try:
-            with youtube_dl.YoutubeDL(options) as youtube:
+            with yt_dlp.YoutubeDL(options) as youtube:
                 youtube.extract_info(link, download=True)
         except Exception as e:
             log.warning('Something went wrong while getting trailer from {}. ERROR: {}'.format(link, e))
