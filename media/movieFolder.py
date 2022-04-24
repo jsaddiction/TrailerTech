@@ -13,7 +13,7 @@ except ImportError:
 
 MIN_MOVIE_DURATION = 600  # In seconds
 MIN_TRAILER_SIZE = 500000  # In bytes
-VIDEO_EXTENSIONS = ['.mkv', '.iso', '.wmv', '.avi', '.mp4', '.m4v', '.img', '.divx', '.mov', '.flv', '.m2ts']
+VIDEO_EXTENSIONS = ['.mkv', '.iso', '.wmv', '.avi', '.mp4', '.m4v', '.img', '.divx', '.mov', '.flv', '.m2ts', '.ts']
 NFO_EXTENSIONS = ['.nfo', '.xml']
 ID_TAGS = ['imdb', 'tmdb', 'imdbid', 'tmdbid', 'tmdb_id', 'imdb_id', 'id']
 IMDB_ID_PATTERN = re.compile(r'ev\d{7,8}\/\d{4}(-\d)?|(ch|co|ev|nm|tt)\d{7,8}')
@@ -84,7 +84,7 @@ class Video(File):
             return False
 
         duration = self.get_duration()
-        if duration:
+        if not duration is None:
             if duration >= MIN_MOVIE_DURATION:
                 return True
             else:
@@ -331,7 +331,7 @@ class MovieFolder():
     def scan(self):
         for item in os.scandir(self.rootDir):
             if os.path.isfile(item.path):
-                ext = os.path.splitext(item.path)[-1]
+                ext = os.path.splitext(item.path)[-1].lower()
                 if ext in VIDEO_EXTENSIONS:
                     video = Video(item.path)
                     isMovie = video.isMovie
