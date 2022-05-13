@@ -38,6 +38,9 @@ then
     error=$(chmod -R ug+rw ${parentDir} 2>&1) || { echo "Failed to set permissions on ${parentDir}. ERROR: ${error}" ; exit 1; }
 fi
 
+echo "*********** Adding script parent directory to safe directories in git ************"
+error=$(git config --global --add safe.directory ${installDirectory}) || { echo "Failed to add ${installDirectory} to git. ERROR: ${error}" ; exit 1; }
+
 ### Clone TrailerTech or update if already exists
 if [ ! -d ${installDirectory} ]
 then
