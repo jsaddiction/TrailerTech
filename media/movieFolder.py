@@ -16,7 +16,7 @@ MIN_TRAILER_SIZE = 500000  # In bytes
 VIDEO_EXTENSIONS = ['.mkv', '.iso', '.wmv', '.avi', '.mp4', '.m4v', '.img', '.divx', '.mov', '.flv', '.m2ts', '.ts']
 NFO_EXTENSIONS = ['.nfo', '.xml']
 ID_TAGS = ['imdb', 'tmdb', 'imdbid', 'tmdbid', 'tmdb_id', 'imdb_id', 'id']
-IMDB_ID_PATTERN = re.compile(r'ev\d{7,8}\/\d{4}(-\d)?|(ch|co|ev|nm|tt)\d{7,8}')
+IMDB_ID_PATTERN = re.compile(r'ev\d{7,8}\/\d{4}(-\d)?|(ch|co|ev|nm|tt)\d{7,8}', flags=re.IGNORECASE)
 TMDB_ID_PATTERN = re.compile(r'[1-9]\d{1,10}')
 YEAR_PATTERN = re.compile(r'\d{4}')
 
@@ -321,10 +321,10 @@ class MovieFolder():
 
     def _parseIMDBFromMovieFile(self):
         if self.movie:
-            imdb = os.path.splitext(self.movie.fileName)[0].split('(')[-1].replace('(', '').replace(')', '').strip()
-            log.debug('Parsed IMDB from movie file name: {}'.format(imdb))
-            match = re.match(IMDB_ID_PATTERN, imdb)
+            match = re.search(IMDB_ID_PATTERN, self.movie.path)
             if match:
+                imdb = match.group(0)
+                log.debug('Parsed IMDB from movie file name: {}'.format(imdb))
                 return imdb
         return None
 
