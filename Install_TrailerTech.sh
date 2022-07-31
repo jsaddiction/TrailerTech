@@ -24,7 +24,7 @@ fi
 if [[ -n "$(command -v apk)" ]]; then
    apk -qU --no-cache update
    apk -qU --no-cache upgrade
-   install="git python3 python3-pip ffmpeg"
+   install="git python3 build-base python3-dev py3-pip ffmpeg"
    for i in ${install}; do
        echo "********** INSTALLING $i **********"
        apk -qU --no-cache --no-progres add $i
