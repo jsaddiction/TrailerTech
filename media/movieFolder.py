@@ -195,7 +195,8 @@ class NFO(File):
         try:
             nfo = et.parse(self.path)
             root  = nfo.getroot()
-        except (IOError, et.ParseError):
+        except (IOError, et.ParseError) as e:
+            log.debug('Failed to parse NFO: {} ERROR: {}'.format(self.fileName, e))
             return
 
 
