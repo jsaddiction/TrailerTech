@@ -293,11 +293,15 @@ class MovieFolder():
     def trailerName(self):
         if self.hasMovie:
             return os.path.splitext(self.movie.fileName)[0] + '-trailer.mp4'
+        else:
+            return self.title + ' (' + self.year + ')-trailer.mp4'
 
     @property
     def trailerDirectory(self):
         if self.hasMovie:
             return os.path.dirname(self.movie.path)
+        else:
+            return self.rootDir
 
     @property
     def hasTrailer(self):
