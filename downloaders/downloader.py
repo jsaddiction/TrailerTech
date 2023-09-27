@@ -51,7 +51,7 @@ class Downloader():
         tempFilePath = os.path.join(DL_DIRECTORY, fileName)
         destinationPath = os.path.join(destinationDirectory, fileName)
         options = {
-        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]',
+        'format': 'bestvideo[vcodec^=avc]+bestaudio[ext=m4a]',
         'default_search': 'auto',
         'restrictfilenames': True,
         'prefer_ffmpeg': True,
